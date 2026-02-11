@@ -23,8 +23,8 @@ export default function CitizenLoginPage() {
     setLoading(true);
 
     try {
-      const BACKEND_URL = "http://localhost:5000";
-      const response = await fetch(`${BACKEND_URL}/citizen-login`, {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+      const response = await fetch(`${API_URL}/api/login`, {  // ✅ Use /api/login, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
