@@ -15,73 +15,66 @@ export default function ChangePasswordPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSave = async (e) => {
-    e.preventDefault();
-    setError("");
+ const handleSave = async (e) => {
+  e.preventDefault();
+  setError("");
 
-    if (newPassword !== confirmPassword) {
-      setError("New password and confirmation do not match!");
+  if (newPassword !== confirmPassword) {
+    setError("New password and confirmation do not match!");
+    return;
+  }
+
+  try {
+    setLoading(true);
+    
+    const userData = localStorage.getItem("currentUser");
+    console.log("📦 userData from localStorage:", userData);
+    
+    if (!userData) {
+      setError("Please login again.");
+      navigate("/citizen-login");
       return;
     }
 
-    try {
-      setLoading(true);
-      
-      // ✅ Get user from localStorage (currentUser, hindi userId/token)
-      const userData = localStorage.getItem("currentUser");
-      if (!userData) {
-        setError("Please login again.");
-        navigate("/citizen-login");
-        return;
-      }
-
-      const user = JSON.parse(userData);
-      const userId = user.id;
-      
-      if (!userId) {
-        setError("User ID not found. Please login again.");
-        navigate("/citizen-login");
-        return;
-      }
-
-      // ✅ FIXED: Use API_BASE instead of localhost
-      console.log("📡 Changing password for user:", userId);
-      
-      const response = await fetch(`${API_BASE}/api/change-password`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          userId,
-          currentPassword,
-          newPassword
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("✅ Password updated successfully!");
-        
-        // Clear the form
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        
-        // Balik sa dashboard
-        navigate("/citizen-home");
-      } else {
-        setError(data.error || "Failed to change password");
-      }
-    } catch (err) {
-      console.error("❌ Error:", err);
-      setError("Network error. Please check your connection.");
-    } finally {
-      setLoading(false);
+    const user = JSON.parse(userData);
+    const userId = user.id;
+    
+    console.log("👤 User object:", user);
+    console.log("🆔 User ID being sent:", userId);
+    console.log("🔑 Current password:", currentPassword);
+    console.log("🆕 New password:", newPassword);
+    
+    if (!userId) {
+      setError("User ID not found. Please login again.");
+      navigate("/citizen-login");
+      return;
     }
-  };
 
+    const response = await fetch(`${API_BASE}/api/change-password`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, currentPassword, newPassword })
+    });
+
+    const data = await response.json();
+    console.log("📥 Response from server:", data);
+
+    if (response.ok) {
+      alert("✅ Password updated successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      navigate("/citizen-home");
+    } else {
+      setError(data.error || "Failed to change password");
+    }
+  } catch (err) {
+    console.error("❌ Error:", err);
+    setError("Network error. Please check your connection.");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div
       style={{
