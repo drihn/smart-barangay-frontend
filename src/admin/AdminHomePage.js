@@ -6,6 +6,9 @@ import bg from "../assets/bg.jpg";
 import BurgerMenu from "../components/BurgerMenu";
 import alertAvatar from "../assets/alert.jpg";
 
+// ✅ ADD THIS LINE - API URL Configuration
+const API_URL = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
+
 export default function AdminHomePage() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
@@ -18,7 +21,10 @@ export default function AdminHomePage() {
   =============================== */
   const fetchPendingCount = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/pending-users");
+      // ✅ FIXED: Use API_URL instead of localhost
+      console.log("📡 Fetching pending count from:", `${API_URL}/api/pending-users`);
+      
+      const res = await fetch(`${API_URL}/api/pending-users`);
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -27,7 +33,7 @@ export default function AdminHomePage() {
         setPendingCount(0);
       }
     } catch (err) {
-      console.error("Failed to fetch pending count:", err);
+      console.error("❌ Failed to fetch pending count:", err);
       setPendingCount(0);
     }
   };
