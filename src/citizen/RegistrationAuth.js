@@ -14,6 +14,7 @@ function RegistrationAuth() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Handle registration
   const handleRegistration = async (e) => {
@@ -26,26 +27,51 @@ function RegistrationAuth() {
     }
 
     setLoading(true);
+    setError("");
 
-  try {
-  const res = await api.post("/signup", {
-    full_name: fullName,
-    email,
-    password,
-  });
+    try {
+      // ✅ FIX 1: Use correct endpoint (/api/signup)
+      // ✅ FIX 2: Use correct field name (first_name, not full_name)
+      const res = await api.post("/api/signup", {
+        first_name: fullName,  // ✅ Changed from full_name to first_name
+        email: email,
+        password: password
+      });
 
-  alert(res.data.message);   // ← user clicks OK here
-  navigate("/");             // ← goes back to SignUpButton
+      console.log("Registration response:", res.data);
+      
+      // ✅ Show success message
+      alert(res.data.message || "Registration successful! Please wait for admin approval.");
+      
+      // ✅ Redirect to citizen login
+      navigate("/citizen-login");
 
-} catch (err) {
-  alert("Cannot connect to server or registration failed");
-}
+    } catch (err) {
+      console.error("Registration error:", err);
+      
+      // ✅ Better error handling
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          "Cannot connect to server or registration failed";
+      
+      setError(errorMessage);
+      alert(`Registration failed: ${errorMessage}`);
+      
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="auth-container" style={{ backgroundImage: `url(${bg})` }}>
       <div className="auth-card">
         <h2>REGISTER</h2>
+        
+        {error && (
+          <div className="error-message" style={{color: 'red', marginBottom: '15px'}}>
+            ⚠️ {error}
+          </div>
+        )}
 
         <form className="registration-form" onSubmit={handleRegistration}>
           <label>Full Name</label>
@@ -55,6 +81,7 @@ function RegistrationAuth() {
             onChange={(e) => setFullName(e.target.value)}
             required
             placeholder="Enter your full name"
+            disabled={loading}
           />
 
           <label>Email</label>
@@ -64,6 +91,7 @@ function RegistrationAuth() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="Enter your email"
+            disabled={loading}
           />
 
           <label>Password</label>
@@ -73,6 +101,7 @@ function RegistrationAuth() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="Create a password"
+            disabled={loading}
           />
 
           <label>Confirm Password</label>
@@ -82,6 +111,7 @@ function RegistrationAuth() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
             placeholder="Confirm your password"
+            disabled={loading}
           />
 
           <button type="submit" className="auth-btn" disabled={loading}>
