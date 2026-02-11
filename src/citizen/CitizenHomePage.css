@@ -1,0 +1,180 @@
+.profile-dropdown {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 999;
+}
+
+.profile-modal {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 220px;
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.modal-card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  max-width: 400px;
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* CitizenHomePage.css - ADD THESE STYLES */
+
+.ai-notice-small {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 20px;
+  font-size: 0.9em;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.ai-badge-small {
+  font-size: 0.7em;
+  background: #6f42c1;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  margin-left: 10px;
+}
+
+/* Prediction Badges */
+.prediction-badges {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+  flex-wrap: wrap;
+}
+
+.category-badge, .risk-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 16px;
+  font-size: 0.8em;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.category-icon, .risk-icon {
+  font-size: 1.1em;
+}
+
+.ai-tiny-badge {
+  font-size: 0.6em;
+  background: #6f42c1;
+  color: white;
+  padding: 1px 4px;
+  border-radius: 8px;
+  margin-left: 4px;
+}
+
+/* Risk Indicator */
+.risk-indicator {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 3px solid;
+}
+
+.risk-label {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 0.85em;
+}
+
+.risk-bar-container {
+  margin-top: 8px;
+}
+
+.risk-bar {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid;
+  margin-bottom: 4px;
+}
+
+.risk-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.risk-scale {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7em;
+  color: #6c757d;
+  margin-top: 3px;
+}
+
+/* For mobile responsiveness */
+@media (max-width: 768px) {
+  .prediction-badges {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .category-badge, .risk-badge {
+    width: fit-content;
+  }
+  
+  .risk-scale span {
+    font-size: 0.65em;
+  }
+}
+.ml-prediction-box {
+  margin: 10px 0;
+  padding: 8px 12px;
+  background: #f3f6fa;
+  border-radius: 8px;
+  border-left: 4px solid #0d6efd;
+}
+
+.ml-category {
+  margin: 0;
+  font-weight: 600;
+}
+
+.ml-risk {
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
+.ml-risk.low { color: green; }
+.ml-risk.medium { color: orange; }
+.ml-risk.high { color: red; }
+.ml-risk.extreme { color: darkred; }
+
+
+

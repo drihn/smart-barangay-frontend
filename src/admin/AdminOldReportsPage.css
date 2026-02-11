@@ -1,0 +1,181 @@
+/* ===== AdminOldReportsPage.css ===== */
+.reports-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.refresh-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 12px;
+  background-color: #2e7d32;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.refresh-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ===== Emergency Response box (Admin-only UI inside citizen reports) ===== */
+.response-box {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(25, 118, 210, 0.06);
+  border: 1px solid rgba(25, 118, 210, 0.18);
+}
+
+.response-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.response-title {
+  margin: 0;
+  font-weight: 800;
+  color: #1b1b1b;
+  font-size: 15px;
+}
+
+/* Label for fields */
+.field-label {
+  display: block;
+  margin-top: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+}
+
+/* Select + textarea styles (match your buttons/rounded UI) */
+.admin-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.2);
+  font-size: 14px;
+  outline: none;
+  background: #fff;
+}
+
+.admin-select:focus {
+  border-color: rgba(25,118,210,0.6);
+  box-shadow: 0 0 0 3px rgba(25,118,210,0.15);
+}
+
+.admin-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0,0,0,0.2);
+  font-size: 14px;
+  outline: none;
+  resize: vertical;
+  background: #fff;
+}
+
+.admin-textarea:focus {
+  border-color: rgba(25,118,210,0.6);
+  box-shadow: 0 0 0 3px rgba(25,118,210,0.15);
+}
+
+/* Update button */
+.update-response-btn {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 12px;
+  background-color: #0d6efd;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.update-response-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+/* Privacy note */
+.privacy-note {
+  margin: 10px 0 0 0;
+  font-size: 12px;
+  color: #555;
+}
+
+/* ===== Status badge ===== */
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: 1px solid rgba(0,0,0,0.12);
+}
+
+/* Color variants */
+.status-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.in_progress {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.status-badge.responded {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.resolved {
+  background: #c3e6cb;
+  color: #155724;
+}
+
+.status-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ===== Small responsive tweak ===== */
+@media (max-width: 600px) {
+  .reports-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .refresh-btn {
+    width: 100%;
+  }
+
+  .post-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .post-image {
+    width: 64px;
+    height: 64px;
+  }
+}

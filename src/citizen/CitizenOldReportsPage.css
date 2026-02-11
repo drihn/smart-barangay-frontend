@@ -1,0 +1,356 @@
+/* ===============================
+   GENERAL LAYOUT
+================================ */
+.Citizen-home-container {
+  position: relative;
+  min-height: 100vh;
+  background-size: cover;
+  background-position: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding-top: 60px;
+}
+
+.background-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 0;
+}
+
+.content-wrapper {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.95);
+  width: 95%;
+  max-width: 1000px;
+  border-radius: 18px;
+  padding: 30px 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+/* ===============================
+   HEADER
+================================ */
+.reports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recent-posts-label {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.refresh-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   POSTS LIST
+================================ */
+.latest-posts {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-height: 550px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.latest-posts::-webkit-scrollbar {
+  width: 6px;
+}
+.latest-posts::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.post-card {
+  display: flex;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 15px;
+  background: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.post-card.alert {
+  border-left: 6px solid #e53935;
+  background: #ffebee;
+}
+
+.post-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-content {
+  flex: 1;
+}
+
+.name-date {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-name {
+  font-weight: 700;
+  position: relative;
+  cursor: pointer;
+}
+
+.hover-details {
+  display: none;
+  position: absolute;
+  top: 22px;
+  left: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.post-name:hover .hover-details {
+  display: block;
+}
+
+.post-date {
+  font-size: 13px;
+  color: #666;
+}
+
+.post-content p {
+  margin: 8px 0;
+  font-size: 15px;
+  color: #333;
+}
+
+.post-attachment {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-top: 10px;
+}
+
+/* ===============================
+   EDIT / DELETE BUTTONS
+================================ */
+.post-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.edit-btn,
+.delete-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.edit-btn {
+  background: #ffb300;
+  color: #000;
+}
+
+.edit-btn:hover {
+  background: #ffa000;
+}
+
+.delete-btn {
+  background: #e53935;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background: #c62828;
+}
+
+.edit-btn:disabled,
+.delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===============================
+   EDIT MODE BOX
+================================ */
+.edit-box {
+  background: #f5f7fa;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 10px;
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 8px 0 4px;
+}
+
+.edit-input,
+.edit-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.edit-textarea {
+  resize: vertical;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.save-btn {
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background: #1b5e20;
+}
+
+.cancel-btn {
+  background: #9e9e9e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background: #757575;
+}
+
+/* ===============================
+   RESPONSE STATUS (CITIZEN VIEW)
+================================ */
+.citizen-response-box {
+  margin-top: 14px;
+  background: #eef4ff;
+  border-left: 5px solid #1976d2;
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.citizen-response-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.citizen-response-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* status colors */
+.status-badge.pending {
+  background: #ffecb3;
+  color: #795548;
+}
+.status-badge.in_progress {
+  background: #bbdefb;
+  color: #0d47a1;
+}
+.status-badge.responded {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+.status-badge.resolved {
+  background: #b2dfdb;
+  color: #004d40;
+}
+.status-badge.rejected {
+  background: #ffcdd2;
+  color: #b71c1c;
+}
+
+.citizen-notes {
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.citizen-warning {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #c62828;
+  font-weight: 600;
+}
+
+/* ===============================
+   MISC
+================================ */
+.no-posts {
+  text-align: center;
+  font-size: 16px;
+  color: #555;
+}
+
+.main-btn {
+  padding: 12px 26px;
+  border-radius: 12px;
+  border: none;
+  background: #1976d2;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.main-btn:hover {
+  background: #125aa3;
+}
