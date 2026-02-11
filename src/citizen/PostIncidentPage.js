@@ -5,14 +5,34 @@ import "./PostIncidentPage.css";
 import defaultAvatar from "../assets/avatar.jpg";
 import bg from "../assets/bg.jpg";
 
-// ✅ FIXED: Use environment variable or Render URL
 const API_BASE = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
 
 export default function PostIncidentPage({ posts, setPosts, currentUser, onPostCreated }) {
   const navigate = useNavigate();
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // ✅ FIXED: Convert image to Base64 para hindi blob error
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Preview muna
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewImage(previewUrl);
+      setImageFile(file);
+    }
+  };
 
   const getActualUserName = () => {
     let name =
@@ -38,21 +58,31 @@ export default function PostIncidentPage({ posts, setPosts, currentUser, onPostC
     setSubmitting(true);
 
     try {
-      // ✅ FIXED: Use API_BASE instead of localhost
+      // ML Prediction
       console.log("📡 Calling ML prediction:", `${API_BASE}/predict`);
       
       const mlRes = await fetch(`${API_BASE}/predict`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: description }) // ✅ Use 'text' not 'description'
+        body: JSON.stringify({ text: description })
       });
 
       const mlData = await mlRes.json();
       console.log("🤖 ML RESULT:", mlData);
 
+      // ✅ Convert image to Base64 (kung may image)
+      let imageBase64 = null;
+      if (imageFile) {
+        imageBase64 = await convertToBase64(imageFile);
+        // Clean up blob URL after conversion
+        if (previewImage) {
+          URL.revokeObjectURL(previewImage);
+        }
+      }
+
       const actualUserName = getActualUserName();
 
-      // ✅ FIXED: Use API_BASE
+      // Submit to database
       const url = `${API_BASE}/api/reports`;
       console.log("🔗 SUBMIT URL:", url);
       console.log("👤 currentUser:", currentUser);
@@ -62,10 +92,10 @@ export default function PostIncidentPage({ posts, setPosts, currentUser, onPostC
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: currentUser.id,
-          incident_type: mlData.category || "Citizen Report", // ✅ Use ML category
+          incident_type: mlData.category || "Citizen Report",
           description: description,
           location: currentUser?.location || currentUser?.address || null,
-          priority: mlData.risk || "Medium" // ✅ Use ML risk
+          priority: mlData.risk || "Medium"
         }),
       });
 
@@ -87,7 +117,7 @@ export default function PostIncidentPage({ posts, setPosts, currentUser, onPostC
 
       const dbReportId = data.reportId || data.report_id;
 
-      // ✅ Create new post object
+      // ✅ Create new post object with Base64 image
       const newPost = {
         id: Date.now(),
         reportId: dbReportId,
@@ -102,18 +132,19 @@ export default function PostIncidentPage({ posts, setPosts, currentUser, onPostC
         date: new Date().toLocaleString(),
         time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         avatar: defaultAvatar,
-        postImage: imageFile ? URL.createObjectURL(imageFile) : null,
+        postImage: imageBase64, // ✅ Base64, hindi blob URL!
         alert: false,
         userType: "citizen",
       };
 
       // Save to localStorage (feed display)
-      if (onPostCreated) onPostCreated(newPost);
-      else if (setPosts) setPosts([newPost, ...(posts || [])]);
+      const existingPosts = JSON.parse(localStorage.getItem("posts")) || [];
+      localStorage.setItem("posts", JSON.stringify([newPost, ...existingPosts]));
 
-      // reset form
+      // Reset form
       setDescription("");
       setImageFile(null);
+      setPreviewImage(null);
 
       alert(`✅ Report successfully submitted as ${actualUserName}! (Report ID: ${dbReportId})`);
       navigate("/citizenhomepage");
@@ -177,6 +208,7 @@ export default function PostIncidentPage({ posts, setPosts, currentUser, onPostC
             placeholder="Describe what happened, when, and where..."
             required
             rows={6}
+            disabled={submitting}
           />
 
           <label htmlFor="image">Attach Photo (Optional)</label>
@@ -184,8 +216,46 @@ export default function PostIncidentPage({ posts, setPosts, currentUser, onPostC
             type="file"
             id="image"
             accept="image/*"
-            onChange={(e) => setImageFile(e.target.files[0])}
+            onChange={handleImageUpload}
+            disabled={submitting}
           />
+
+          {previewImage && (
+            <div style={{ position: "relative", marginTop: "10px" }}>
+              <img
+                src={previewImage}
+                alt="Preview"
+                style={{
+                  maxHeight: "200px",
+                  borderRadius: "10px",
+                  width: "100%",
+                  objectFit: "contain"
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  URL.revokeObjectURL(previewImage);
+                  setPreviewImage(null);
+                  setImageFile(null);
+                }}
+                style={{
+                  position: "absolute",
+                  top: "5px",
+                  right: "5px",
+                  background: "rgba(255,0,0,0.8)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "30px",
+                  height: "30px",
+                  cursor: "pointer"
+                }}
+              >
+                ✕
+              </button>
+            </div>
+          )}
 
           <div className="post-incident-buttons">
             <button type="submit" className="submit-btn" disabled={submitting}>
