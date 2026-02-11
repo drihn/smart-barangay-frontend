@@ -390,9 +390,14 @@ export default function CitizenHomePage({ posts = [], currentUser: propUser, onL
     </p>
   </div>
 )}
-                          {post.postImage && (
-                            <img src={post.postImage} alt="Post attachment" className="post-attachment" />
-                          )}
+                       {post.postImage && (
+  <img 
+    src={post.postImage} 
+    alt="Post attachment" 
+    className="post-attachment"
+    style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }}
+  />
+)}
                         </>
                       )}
 
