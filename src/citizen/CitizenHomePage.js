@@ -1,3 +1,4 @@
+// src/citizen/CitizenHomePage.js
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CitizenHomePage.css";
@@ -6,7 +7,8 @@ import defaultAvatar from "../assets/avatar.jpg";
 import alertAvatar from "../assets/alert.jpg";
 import BurgerMenu from "../components/BurgerMenu";
 
-const API_BASE = "http://localhost:5000";
+// ✅ FIXED: Use environment variable or Render URL
+const API_BASE = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
 
 export default function CitizenHomePage({ posts = [], currentUser: propUser, onLogout }) {
   const navigate = useNavigate();
@@ -147,6 +149,9 @@ export default function CitizenHomePage({ posts = [], currentUser: propUser, onL
     if (!window.confirm("Delete your report?")) return;
 
     try {
+      // ✅ FIXED: Use API_BASE
+      console.log("📡 Deleting report:", `${API_BASE}/api/reports/${reportId}`);
+      
       const res = await fetch(`${API_BASE}/api/reports/${reportId}`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -177,7 +182,7 @@ export default function CitizenHomePage({ posts = [], currentUser: propUser, onL
       rebuildFeed();
       alert("✅ Deleted!");
     } catch (err) {
-      console.error(err);
+      console.error("❌ Delete error:", err);
       alert("Network error while deleting.");
     }
   };
@@ -206,6 +211,9 @@ export default function CitizenHomePage({ posts = [], currentUser: propUser, onL
 
     setSavingEdit(true);
     try {
+      // ✅ FIXED: Use API_BASE
+      console.log("📡 Updating report:", `${API_BASE}/api/reports/${editingReportId}`);
+      
       const res = await fetch(`${API_BASE}/api/reports/${editingReportId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -239,13 +247,13 @@ export default function CitizenHomePage({ posts = [], currentUser: propUser, onL
       window.dispatchEvent(new Event("postsUpdated"));
       rebuildFeed();
     } catch (err) {
-      console.error(err);
+      console.error("❌ Update error:", err);
       alert("Network error while saving edit.");
     } finally {
       setSavingEdit(false);
     }
   };
-
+  
   if (!loggedInUser) {
     return (
       <div className="Citizen-home-container" style={{ backgroundImage: `url(${bg})` }}>
