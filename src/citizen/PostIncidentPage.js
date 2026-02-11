@@ -5,7 +5,8 @@ import "./PostIncidentPage.css";
 import defaultAvatar from "../assets/avatar.jpg";
 import bg from "../assets/bg.jpg";
 
-const API_BASE = "http://localhost:5000";
+// ✅ FIXED: Use environment variable or Render URL
+const API_BASE = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
 
 export default function PostIncidentPage({ posts, setPosts, currentUser, onPostCreated }) {
   const navigate = useNavigate();
@@ -36,31 +37,35 @@ export default function PostIncidentPage({ posts, setPosts, currentUser, onPostC
 
     setSubmitting(true);
 
-    const mlRes = await fetch("http://127.0.0.1:5000/predict", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ description })
-});
-
-const mlData = await mlRes.json();
-
-console.log("🤖 ML RESULT:", mlData);
-
-    const actualUserName = getActualUserName();
-
-    const url = `${API_BASE}/api/reports`;
-    console.log("🔗 SUBMIT URL:", url);
-    console.log("👤 currentUser:", currentUser);
-
     try {
+      // ✅ FIXED: Use API_BASE instead of localhost
+      console.log("📡 Calling ML prediction:", `${API_BASE}/predict`);
+      
+      const mlRes = await fetch(`${API_BASE}/predict`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: description }) // ✅ Use 'text' not 'description'
+      });
+
+      const mlData = await mlRes.json();
+      console.log("🤖 ML RESULT:", mlData);
+
+      const actualUserName = getActualUserName();
+
+      // ✅ FIXED: Use API_BASE
+      const url = `${API_BASE}/api/reports`;
+      console.log("🔗 SUBMIT URL:", url);
+      console.log("👤 currentUser:", currentUser);
+
       const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           user_id: currentUser.id,
-          incident_type: "Citizen Report",
+          incident_type: mlData.category || "Citizen Report", // ✅ Use ML category
           description: description,
           location: currentUser?.location || currentUser?.address || null,
+          priority: mlData.risk || "Medium" // ✅ Use ML risk
         }),
       });
 
@@ -80,31 +85,28 @@ console.log("🤖 ML RESULT:", mlData);
         return;
       }
 
-      const dbReportId = data.reportId;
+      const dbReportId = data.reportId || data.report_id;
 
-      // ✅ IMPORTANT: store BOTH reportId and report_id
-      // so AdminOldReportsPage can find it no matter what key it uses
+      // ✅ Create new post object
       const newPost = {
-          id: Date.now(),
-          reportId: dbReportId,
-          report_id: dbReportId,
+        id: Date.now(),
+        reportId: dbReportId,
+        report_id: dbReportId,
+        userName: actualUserName,
+        userId: currentUser.id,
+        location: currentUser?.location || currentUser?.address || "Barangay",
+        phoneNumber: currentUser?.phone || currentUser?.phoneNumber || "N/A",
+        content: description,
+        category: mlData.category || "Unknown",
+        risk_level: mlData.risk_level || mlData.risk || "Unknown",
+        date: new Date().toLocaleString(),
+        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        avatar: defaultAvatar,
+        postImage: imageFile ? URL.createObjectURL(imageFile) : null,
+        alert: false,
+        userType: "citizen",
+      };
 
-          userName: actualUserName,
-          userId: currentUser.id,
-          location: currentUser?.location || currentUser?.address || "Barangay",
-          phoneNumber: currentUser?.phone || currentUser?.phoneNumber || "N/A",
-          content: description,
-
-          category: mlData.category,
-          risk_level: mlData.risk_level,
-
-          date: new Date().toLocaleString(),
-          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          avatar: defaultAvatar,
-          postImage: imageFile ? URL.createObjectURL(imageFile) : null,
-          alert: false,
-          userType: "citizen",
-        };
       // Save to localStorage (feed display)
       if (onPostCreated) onPostCreated(newPost);
       else if (setPosts) setPosts([newPost, ...(posts || [])]);
@@ -115,9 +117,10 @@ console.log("🤖 ML RESULT:", mlData);
 
       alert(`✅ Report successfully submitted as ${actualUserName}! (Report ID: ${dbReportId})`);
       navigate("/citizenhomepage");
+      
     } catch (err) {
       console.error("🌐 NETWORK ERROR:", err);
-      alert(`Network error: ${err.message}`);
+      alert(`Network error: ${err.message}. Make sure backend is running at ${API_BASE}`);
     } finally {
       setSubmitting(false);
     }
