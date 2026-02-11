@@ -13,68 +13,74 @@ export default function AdminLoginPage({ onLogin }) {  // ✅ ADD onLogin prop
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!email || !password) {
-      setError("Please enter email and password");
-      return;
+  if (!email || !password) {
+    setError("Please enter email and password");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const API_URL = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com"; // ✅ FIXED: Use Render URL
+    const response = await fetch(`${API_URL}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    console.log("Admin login response:", data);
+
+    if (!response.ok || data.success === false) {
+      throw new Error(data.message || "Admin login failed");
     }
 
-    setLoading(true);
-
-    try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-      const response = await fetch(`${API_URL}/api/login`, {  // ✅ Use /api/login, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-      console.log("Admin login response:", data);
-
-      if (!response.ok || data.success === false) {
-        throw new Error(data.error || "Admin login failed");
-      }
-
-      // ✅ FIXED: Save as currentUser NOT currentAdmin
-      const adminData = {
-        id: data.admin.id,
-        _id: data.admin.id,
-        first_name: data.admin.first_name,
-        name: data.admin.first_name,  // ✅ ADD name property
-        fullName: data.admin.first_name,
-        email: data.admin.email,
-        role: "admin",  // ✅ SET AS ADMIN
-        userType: "admin",  // ✅ ADD userType
-        ...data.admin
-      };
-
-      console.log("Saving admin data:", adminData);
-      
-      // ✅ FIXED: Save to currentUser
-      localStorage.setItem("currentUser", JSON.stringify(adminData));
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userType", "admin");
-
-      // ✅ If onLogin prop exists, call it
-      if (onLogin) {
-        onLogin(adminData);  // ✅ This updates App.js state
-      } else {
-        // Fallback: redirect directly
-        navigate("/admin-homepage");
-      }
-
-    } catch (err) {
-      console.error("Admin login error:", err);
-      setError(err.message);
-      alert(`Admin login failed: ${err.message}`);
-    } finally {
-      setLoading(false);
+    // ✅ Check if user data exists
+    if (!data.user) {
+      throw new Error("No user data received from server");
     }
-  };
 
+    // ✅ Check if admin
+    if (data.user.role !== "admin") {
+      throw new Error("This account is not an admin");
+    }
+
+    // ✅ FIXED: Use data.user, NOT data.admin!
+    const adminData = {
+      id: data.user.id,
+      _id: data.user.id,
+      first_name: data.user.first_name,
+      name: data.user.first_name,
+      fullName: data.user.first_name,
+      email: data.user.email,
+      role: "admin",
+      userType: "admin",
+      ...data.user
+    };
+
+    console.log("Saving admin data:", adminData);
+    
+    localStorage.setItem("currentUser", JSON.stringify(adminData));
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userType", "admin");
+
+    if (onLogin) {
+      onLogin(adminData);
+    } else {
+      navigate("/admin-homepage");
+    }
+
+  } catch (err) {
+    console.error("Admin login error:", err);
+    setError(err.message);
+    alert(`Admin login failed: ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div
       className="admin-login-container"
