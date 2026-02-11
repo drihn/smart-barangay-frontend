@@ -12,77 +12,74 @@ export default function CitizenLoginPage() {
   const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (!email || !password) {
-      setError("Please enter email and password");
-      return;
+  if (!email || !password) {
+    setError("Please enter email and password");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const API_URL = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
+    console.log("🔍 Using API URL:", API_URL);
+    
+    const response = await fetch(`${API_URL}/api/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        email: email.trim(), 
+        password: password.trim() 
+      }),
+    });
+
+    const data = await response.json();
+    console.log("🔍 Full API response:", data);
+
+    if (!response.ok || data.success === false) {
+      throw new Error(data.message || "Login failed");
     }
 
-    setLoading(true);
-
-    try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-      const response = await fetch(`${API_URL}/api/login`, {  // ✅ Use /api/login, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: email.trim(), 
-          password: password.trim() 
-        }),
-      });
-
-      if (!response.ok) {
-        const text = await response.text();
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success === false) {
-        throw new Error(data.error || "Login failed");
-      }
-
-      if (!data.citizen) {
-        throw new Error("Invalid server response");
-      }
-
-      // ✅ ADD THIS CHECK: Verify the user is actually a citizen
-      const userRole = data.citizen.role || data.citizen.userType || "";
-      
-      if (userRole.toLowerCase() === "admin") {
-        throw new Error("This is an admin account. Please use the Admin Login page.");
-      }
-      
-      if (userRole.toLowerCase() !== "citizen") {
-        throw new Error("Unauthorized access. This account is not registered as a citizen.");
-      }
-
-      // Save user data to localStorage
-      localStorage.setItem("currentUser", JSON.stringify({
-        id: data.citizen.id,
-        first_name: data.citizen.first_name,
-        email: data.citizen.email,
-        role: userRole.toLowerCase() || "citizen"
-      }));
-      
-      localStorage.setItem("isLoggedIn", "true");
-
-      // Show success message
-      alert(`Welcome ${data.citizen.first_name}! Login successful.`);
-
-      // Redirect to homepage
-      navigate("/citizenhomepage");
-
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message);
-      alert(`Login failed: ${err.message}`);
-    } finally {
-      setLoading(false);
+    if (!data.user) {
+      throw new Error("No user data received from server");
     }
-  };
+
+    const user = data.user;
+    console.log("🔍 User role:", user.role);
+
+    // ✅ Check if citizen
+    if (user.role !== "citizen") {
+      throw new Error(`This account is ${user.role}, not citizen. Please use correct login.`);
+    }
+
+    // ✅ Check if approved
+    if (user.status !== "approve") {
+      throw new Error("Your account is still pending approval");
+    }
+
+    // ✅ Save to localStorage
+    localStorage.setItem("currentUser", JSON.stringify({
+      id: user.id,
+      first_name: user.first_name,
+      email: user.email,
+      role: "citizen"
+    }));
+    
+    localStorage.setItem("isLoggedIn", "true");
+
+    alert(`Welcome ${user.first_name}! Login successful.`);
+    navigate("/citizenhomepage");
+
+  } catch (err) {
+    console.error("❌ Login error:", err);
+    setError(err.message);
+    alert(`Login failed: ${err.message}`);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="citizen-login-container">
