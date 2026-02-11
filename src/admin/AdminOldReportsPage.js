@@ -5,6 +5,9 @@ import "./AdminOldReportsPage.css";
 import bg from "../assets/bg.jpg";
 import BurgerMenu from "../components/BurgerMenu";
 
+// ✅ ADD THIS LINE - API URL Configuration
+const API_URL = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
+
 export default function AdminOldReportsPage({ posts, currentUser }) {
   const navigate = useNavigate();
 
@@ -25,8 +28,11 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
   const loadDbReports = async () => {
     setLoadingReports(true);
     try {
+      // ✅ FIXED: Use API_URL instead of localhost
+      console.log("📡 Loading reports from:", `${API_URL}/api/admin/reports?admin_id=${adminId}`);
+      
       const res = await fetch(
-        `http://localhost:5000/api/admin/reports?admin_id=${adminId}`
+        `${API_URL}/api/admin/reports?admin_id=${adminId}`
       );
 
       // Read as text first (safe even if backend returns HTML on error)
@@ -39,7 +45,7 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
       }
 
       if (!res.ok) {
-        console.log("LOAD DB REPORTS FAILED:", res.status, data);
+        console.log("❌ LOAD DB REPORTS FAILED:", res.status, data);
         setDbReports({});
         return;
       }
@@ -54,8 +60,9 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
       });
 
       setDbReports(map);
+      console.log("✅ Reports loaded:", Object.keys(map).length);
     } catch (e) {
-      console.error("NETWORK ERROR (loadDbReports):", e);
+      console.error("❌ NETWORK ERROR (loadDbReports):", e);
       setDbReports({});
     } finally {
       setLoadingReports(false);
@@ -97,8 +104,11 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
       "";
 
     try {
+      // ✅ FIXED: Use API_URL instead of localhost
+      console.log("📡 Updating report:", `${API_URL}/api/admin/reports/${reportId}/status`);
+      
       const res = await fetch(
-        `http://localhost:5000/api/admin/reports/${reportId}/status`,
+        `${API_URL}/api/admin/reports/${reportId}/status`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -120,7 +130,7 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
       }
 
       if (!res.ok) {
-        console.log("UPDATE FAILED:", res.status, data);
+        console.log("❌ UPDATE FAILED:", res.status, data);
         alert(data.error || `Update failed (${res.status}). Check console.`);
         return;
       }
@@ -137,7 +147,7 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
 
       alert("✅ Emergency response updated!");
     } catch (e) {
-      console.error("NETWORK ERROR (updateEmergencyStatus):", e);
+      console.error("❌ NETWORK ERROR (updateEmergencyStatus):", e);
       alert(`Network error: ${e.message}`);
     }
   };
@@ -171,7 +181,7 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
               disabled={loadingReports}
               title="Refresh DB reports"
             >
-              {loadingReports ? "Refreshing..." : "Refresh"}
+              {loadingReports ? "Refreshing..." : "🔄 Refresh"}
             </button>
           </div>
 
@@ -291,7 +301,7 @@ export default function AdminOldReportsPage({ posts, currentUser }) {
 
           <div style={{ marginTop: "20px", textAlign: "center" }}>
             <button className="main-btn" onClick={() => navigate("/admin-home")}>
-              Back to Dashboard
+              ← Back to Dashboard
             </button>
           </div>
         </div>
