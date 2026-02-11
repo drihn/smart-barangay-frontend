@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import "../citizen/PostIncidentPage.css"; // reuse same CSS
 import bg from "../assets/bg.jpg";
 
+// ✅ FIXED: Use environment variable or Render URL
+const API_BASE = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
+
 export default function AdminPostPage() {
   const navigate = useNavigate();
   const [content, setContent] = useState("");
@@ -14,76 +17,67 @@ export default function AdminPostPage() {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
-      setPreviewImage(URL.createObjectURL(file)); // create temporary URL for preview
+      setPreviewImage(URL.createObjectURL(file));
     }
   };
-const handlePost = async (e) => {
-  e.preventDefault();
+  
+  const handlePost = async (e) => {
+    e.preventDefault();
 
-  if (!content.trim()) {
-    alert("Please write something before posting!");
-    return;
-  }
-
-  try {
-    // 🔥 CALL ML BACKEND
-    const mlRes = await fetch("http://127.0.0.1:5000/predict", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        description: content,
-      }),
-    });
-
-    const mlData = await mlRes.json();
-
-    console.log("🤖 ADMIN ML RESULT:", mlData);
-
-    if (!mlRes.ok) {
-      alert("ML prediction failed");
+    if (!content.trim()) {
+      alert("Please write something before posting!");
       return;
     }
 
-    const storedPosts = JSON.parse(localStorage.getItem("posts")) || [];
+    try {
+      // ✅ FIXED: Use API_BASE instead of localhost
+      console.log("📡 Calling ML prediction:", `${API_BASE}/predict`);
+      
+      const mlRes = await fetch(`${API_BASE}/predict`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: content, // ✅ Use 'text' not 'description'
+        }),
+      });
 
-    const newPost = {
-      id: Date.now(),
-      userName: "Barangay Admin OFFICIAL",
-      userType: "admin",
-      avatar: "/assets/admin-avatar.png",
-      location: "Admin Office",
-      phoneNumber: "N/A",
+      const mlData = await mlRes.json();
+      console.log("🤖 ADMIN ML RESULT:", mlData);
 
-      content,
+      if (!mlRes.ok) {
+        alert("ML prediction failed");
+        return;
+      }
 
-      // ✅ MATCH CITIZEN FORMAT
-      category: mlData.category,
-      risk_level: mlData.risk_level,
+      const storedPosts = JSON.parse(localStorage.getItem("posts")) || [];
 
-      postImage: imageFile ? URL.createObjectURL(imageFile) : null,
-      date: new Date().toLocaleString(),
+      const newPost = {
+        id: Date.now(),
+        userName: "Barangay Admin OFFICIAL",
+        userType: "admin",
+        avatar: "/assets/admin-avatar.png",
+        location: "Admin Office",
+        phoneNumber: "N/A",
+        content,
+        category: mlData.category,
+        risk_level: mlData.risk_level,
+        postImage: imageFile ? URL.createObjectURL(imageFile) : null,
+        date: new Date().toLocaleString(),
+        alert: mlData.risk_level === "High" || mlData.risk_level === "Extreme",
+      };
 
-      // 🔥 AUTO URGENT IF HIGH / EXTREME
-      alert:
-        mlData.risk_level === "High" ||
-        mlData.risk_level === "Extreme",
-    };
+      localStorage.setItem("posts", JSON.stringify([newPost, ...storedPosts]));
 
-    localStorage.setItem("posts", JSON.stringify([newPost, ...storedPosts]));
+      alert(`✅ Announcement Posted!\n\nCategory: ${mlData.category}\nRisk Level: ${mlData.risk_level}`);
+      navigate("/admin-home");
 
-    alert(
-      `✅ Announcement Posted!\n\nCategory: ${mlData.category}\nRisk Level: ${mlData.risk_level}`
-    );
-
-    navigate("/admin-home");
-
-  } catch (err) {
-    console.error("ML error:", err);
-    alert("Backend not reachable");
-  }
-};
+    } catch (err) {
+      console.error("❌ ML error:", err);
+      alert("Backend not reachable. Make sure backend is running at " + API_BASE);
+    }
+  };
 
   return (
     <div
