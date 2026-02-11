@@ -1,7 +1,11 @@
+// ChangePasswordPage.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bg from "../assets/bg.jpg";
 import "./ChangePasswordPage.css";
+
+// ✅ FIXED: Use environment variable or Render URL
+const API_BASE = process.env.REACT_APP_API_URL || "https://ml-backend-8sz5.onrender.com";
 
 export default function ChangePasswordPage() {
   const navigate = useNavigate();
@@ -11,7 +15,6 @@ export default function ChangePasswordPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ITO ANG BAGONG handleSave FUNCTION NA NASA QUESTION MO
   const handleSave = async (e) => {
     e.preventDefault();
     setError("");
@@ -24,25 +27,30 @@ export default function ChangePasswordPage() {
     try {
       setLoading(true);
       
-      // Kunin ang userId at token mula sa localStorage
-      // IMPORTANT: Siguraduhin na naka-store ang 'userId' at 'token' sa localStorage
-      // pagkatapos mag-login
-      const userId = localStorage.getItem("userId");
-      const token = localStorage.getItem("token");
-
-      // Kung wala ang userId o token, mag-error
-      if (!userId || !token) {
+      // ✅ Get user from localStorage (currentUser, hindi userId/token)
+      const userData = localStorage.getItem("currentUser");
+      if (!userData) {
         setError("Please login again.");
-        navigate("/login");
+        navigate("/citizen-login");
         return;
       }
 
-      // I-send ang request sa backend API
-      const response = await fetch("http://localhost:5000/api/change-password", {
+      const user = JSON.parse(userData);
+      const userId = user.id;
+      
+      if (!userId) {
+        setError("User ID not found. Please login again.");
+        navigate("/citizen-login");
+        return;
+      }
+
+      // ✅ FIXED: Use API_BASE instead of localhost
+      console.log("📡 Changing password for user:", userId);
+      
+      const response = await fetch(`${API_BASE}/api/change-password`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           userId,
@@ -54,9 +62,9 @@ export default function ChangePasswordPage() {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Password updated successfully!");
+        alert("✅ Password updated successfully!");
         
-        // Optional: Clear the form
+        // Clear the form
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
@@ -67,7 +75,7 @@ export default function ChangePasswordPage() {
         setError(data.error || "Failed to change password");
       }
     } catch (err) {
-      console.error("Error:", err);
+      console.error("❌ Error:", err);
       setError("Network error. Please check your connection.");
     } finally {
       setLoading(false);
@@ -135,7 +143,6 @@ export default function ChangePasswordPage() {
           Change Password
         </h1>
 
-        {/* Error Message Display */}
         {error && (
           <div style={{
             backgroundColor: "#ffebee",
@@ -145,7 +152,7 @@ export default function ChangePasswordPage() {
             marginBottom: "20px",
             textAlign: "center"
           }}>
-            {error}
+            ⚠️ {error}
           </div>
         )}
 
